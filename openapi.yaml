@@ -1,0 +1,401 @@
+openapi: 3.0.3
+info:
+  title: Lending Platform Backend API
+  version: "1.0.0"
+  description: >
+    Unified backend covering accounts, borrowers, loans, documents, and
+    lending records with ML-assisted risk scoring. All endpoints return
+    JSON in the shape { "success": bool, ... }.
+servers:
+  - url: /
+security:
+  - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error: { type: string }
+    PaginationMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        page_size: { type: integer }
+        total_items: { type: integer }
+        total_pages: { type: integer }
+        has_next: { type: boolean }
+        has_prev: { type: boolean }
+  parameters:
+    PageParam:
+      in: query
+      name: page
+      schema: { type: integer, minimum: 1, default: 1 }
+    PageSizeParam:
+      in: query
+      name: page_size
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    SortByParam:
+      in: query
+      name: sort_by
+      schema: { type: string }
+      description: Allow-listed per endpoint; see the corresponding route for valid values.
+    SortDirParam:
+      in: query
+      name: sort_dir
+      schema: { type: string, enum: [ASC, DESC] }
+paths:
+  /health:
+    get:
+      summary: Health check (basic)
+      security: []
+      responses:
+        "200": { description: OK }
+  /health/live:
+    get:
+      summary: Liveness probe — process is up. Does not check the database.
+      security: []
+      responses:
+        "200": { description: Process is running }
+  /health/ready:
+    get:
+      summary: Readiness probe — process is up AND the database is reachable.
+      security: []
+      responses:
+        "200": { description: Ready to serve traffic }
+        "503": { description: Database unreachable; remove from load balancer rotation }
+  /accounts/register:
+    post:
+      summary: Register a new user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, confirm_password]
+              properties:
+                name: { type: string }
+                email: { type: string }
+                phone: { type: string }
+                password: { type: string }
+                confirm_password: { type: string }
+      responses:
+        "201": { description: Created }
+        "400": { description: Validation error, content: { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } } }
+        "409": { description: Email already registered }
+  /accounts/login:
+    post:
+      summary: Log in and receive a JWT access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200": { description: "OK — returns token, expires_at, and user" }
+        "401": { description: Invalid credentials }
+  /accounts/logout:
+    post:
+      summary: Revoke the current session token
+      responses:
+        "200": { description: OK }
+  /accounts/me:
+    get:
+      summary: Get the current authenticated user
+      responses:
+        "200": { description: OK }
+  /borrowers:
+    post:
+      summary: Register a borrower (Aadhaar validated, encrypted at rest, duplicate-checked by Aadhaar)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, aadhaar_number]
+              properties:
+                name: { type: string }
+                aadhaar_number: { type: string, description: "Exactly 12 digits" }
+                phone: { type: string }
+                address: { type: string }
+      responses:
+        "201": { description: Created }
+        "409": { description: Borrower already exists }
+  /borrowers/search:
+    get:
+      summary: Search borrowers by name and/or Aadhaar number (paginated, sortable)
+      parameters:
+        - in: query
+          name: name
+          schema: { type: string }
+        - in: query
+          name: aadhaar_number
+          schema: { type: string }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SortByParam"
+          description: One of `created_at`, `name`, `id`. Defaults to `created_at`.
+        - $ref: "#/components/parameters/SortDirParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" }
+  /borrowers/{borrower_id}:
+    get:
+      summary: Get one borrower
+      parameters:
+        - in: path
+          name: borrower_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: OK }
+        "404": { description: Not found }
+  /loans:
+    post:
+      summary: Create a loan agreement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [borrower_id, lender_name, loan_amount, nominee_signature, lender_signature, borrower_signature]
+              properties:
+                borrower_id: { type: integer }
+                lender_name: { type: string }
+                loan_amount: { type: string, description: "Decimal string, e.g. '50000.00'" }
+                nominee_name: { type: string }
+                nominee_signature: { type: string }
+                lender_signature: { type: string }
+                borrower_signature: { type: string }
+      responses:
+        "201": { description: Created }
+  /loans/{loan_id}:
+    get:
+      summary: Get one loan
+      parameters:
+        - in: path
+          name: loan_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: OK }
+  /loans/{loan_id}/payments:
+    post:
+      summary: Record a payment (recalculates remaining amount atomically)
+      parameters:
+        - in: path
+          name: loan_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount_paid]
+              properties:
+                amount_paid: { type: string }
+      responses:
+        "201": { description: Created }
+    get:
+      summary: Payment history for a loan (paginated; defaults to chronological/ASC order)
+      parameters:
+        - in: path
+          name: loan_id
+          required: true
+          schema: { type: integer }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SortByParam"
+          description: One of `paid_on`, `id`. Defaults to `paid_on`.
+        - $ref: "#/components/parameters/SortDirParam"
+          description: Defaults to `ASC` for this endpoint (chronological), unlike other list endpoints.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" }
+  /borrowers/{borrower_id}/loans:
+    get:
+      summary: All loans for a borrower (paginated, sortable)
+      parameters:
+        - in: path
+          name: borrower_id
+          required: true
+          schema: { type: integer }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SortByParam"
+          description: One of `created_at`, `id`, `loan_amount`. Defaults to `created_at`.
+        - $ref: "#/components/parameters/SortDirParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" }
+  /documents/upload:
+    post:
+      summary: Upload a document (multipart/form-data)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                document: { type: string, format: binary }
+                doc_type: { type: string }
+                borrower_id: { type: integer }
+                loan_id: { type: integer }
+      responses:
+        "201": { description: Created }
+  /documents:
+    get:
+      summary: List the current user's documents (paginated, sortable)
+      parameters:
+        - in: query
+          name: borrower_id
+          schema: { type: integer }
+        - in: query
+          name: loan_id
+          schema: { type: integer }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PageSizeParam"
+        - $ref: "#/components/parameters/SortByParam"
+          description: One of `uploaded_at`, `id`, `doc_type`. Defaults to `uploaded_at`.
+        - $ref: "#/components/parameters/SortDirParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" }
+  /documents/{doc_id}/download:
+    get:
+      summary: Download a document (ownership-checked)
+      parameters:
+        - in: path
+          name: doc_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: File stream }
+  /documents/{doc_id}:
+    delete:
+      summary: Delete a document
+      parameters:
+        - in: path
+          name: doc_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200": { description: OK }
+  /documents/template/download:
+    get:
+      summary: Download the blank loan agreement template
+      security: []
+      responses:
+        "200": { description: File stream }
+  /api/lending/check-duplicate:
+    get:
+      summary: Preview whether a lending record already exists for an Aadhaar number, with risk classification
+      description: >
+        Requires authentication (see "Honest limitations" in the README: this
+        endpoint previously had no auth check at all, which allowed anyone to
+        pull PII by Aadhaar number — fixed in this pass).
+      parameters:
+        - in: query
+          name: aadhaar_number
+          schema: { type: string }
+        - in: query
+          name: new_amount
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+  /api/lending/create:
+    post:
+      summary: Create a lending record (blocked on duplicate Aadhaar)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [borrower_name, aadhaar_number, lender_name, amount, agreement_filename, photo_filename, password, confirm_password]
+      responses:
+        "201": { description: Created }
+        "409": { description: Duplicate Aadhaar }
+  /api/lending/pay:
+    post:
+      summary: Record a payment against a lending record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [borrower_name, aadhaar_number, paying_amount, password, confirm_password, agreement_filename]
+      responses:
+        "200": { description: OK }
+  /api/lending/remove:
+    post:
+      summary: Remove a lending record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [borrower_name, aadhaar_number, password, confirm_password]
+      responses:
+        "200": { description: OK }
+  /api/lending/{aadhaar_number}:
+    get:
+      summary: Fetch a lending record by Aadhaar number (password fields never returned)
+      parameters:
+        - in: path
+          name: aadhaar_number
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: OK }
+        "404": { description: Not found }
+  /admin/sessions/cleanup:
+    post:
+      summary: (admin only) Manually trigger the expired-session cleanup job
+      responses:
+        "200": { description: OK }
+        "403": { description: Forbidden — requires admin role }
