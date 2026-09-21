@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enter Lender Details</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/components.css">
+</head>
+<body>
+
+  <div class="wrap">
+
+    <header class="head">
+      <p class="eyebrow">Lending Desk</p>
+      <h1>Enter Your Lending Details</h1>
+      <p class="sub">Fill in the borrower's information, attach the loan agreement, capture their photo, and set a security password to protect this record.</p>
+    </header>
+
+    <!-- Duplicate borrower panel: shown automatically when the Aadhar
+         number typed below already has a lending record on file.
+         aria-live so screen reader users are told the moment it appears,
+         since it's injected after the fact by JS, not present on load. -->
+    <section id="duplicatePanel" class="card duplicate-panel hidden" aria-live="polite">
+      <h2>Existing record found for this Aadhar number</h2>
+      <dl class="dup-list">
+        <dt>Lender name</dt><dd id="dupLenderName">—</dd>
+        <dt>Existing amount</dt><dd id="dupExistingAmount">—</dd>
+        <dt>New amount entered</dt><dd id="dupNewAmount">—</dd>
+        <dt>Dual amount (existing + new)</dt><dd id="dupDualAmount">—</dd>
+        <dt>Phone number</dt><dd id="dupPhone">—</dd>
+        <dt>Recorded on</dt><dd id="dupDateTime">—</dd>
+      </dl>
+      <div class="risk-badge-row">
+        <span>Risk level:</span>
+        <span id="dupRiskBadge" class="risk-badge">—</span>
+      </div>
+      <p class="dup-note">A record already exists for this borrower, so a second entry can't be created here. Use the <a href="../pay/pay.html">Update / Pay</a> service instead to log a payment against it.</p>
+    </section>
+
+    <form id="lenderForm" class="card" novalidate>
+
+      <div class="field">
+        <label for="bname">Borrower name</label>
+        <input type="text" id="bname" placeholder="e.g. Ramesh Kumar" autocomplete="name" aria-describedby="err-bname" required>
+        <span class="error" id="err-bname" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="aadhar">Aadhar number</label>
+        <!-- autocomplete="off" for a government ID: browsers should not offer
+             to save/autofill this as they might for a name or phone number -->
+        <input type="text" id="aadhar" inputmode="numeric" maxlength="14" placeholder="XXXX XXXX XXXX" autocomplete="off" aria-describedby="err-aadhar" required>
+        <span class="error" id="err-aadhar" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="contact">Contact number</label>
+        <input type="tel" id="contact" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel" aria-describedby="err-contact" required>
+        <span class="error" id="err-contact" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="amount">Amount received from lender</label>
+        <!-- text + inputmode instead of type="number": avoids the scroll-wheel
+             footgun on number inputs and lets JS apply thousands separators
+             as the user types (handled in enter-lender.js) -->
+        <input type="text" id="amount" inputmode="numeric" placeholder="e.g. 2,50,000" autocomplete="off" aria-describedby="err-amount" required>
+        <span class="error" id="err-amount" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="agreementFile">Loan agreement file</label>
+        <input type="file" id="agreementFile" accept=".pdf,.doc,.docx" aria-describedby="agreementFileName err-agreementFile" required>
+        <span class="file-name" id="agreementFileName" aria-live="polite">No file chosen</span>
+        <span class="error" id="err-agreementFile" role="alert" aria-live="polite"></span>
+      </div>
+
+      <fieldset class="field full">
+        <legend>Borrower photo</legend>
+        <div class="photo-toggle" role="group" aria-label="Photo capture method">
+          <button type="button" class="toggle-btn active" id="btnUploadMode" aria-pressed="true">Upload file</button>
+          <button type="button" class="toggle-btn" id="btnCameraMode" aria-pressed="false">Use camera</button>
+        </div>
+
+        <div id="uploadPhotoPanel" class="photo-panel">
+          <label for="photoFile" class="visually-hidden">Choose borrower photo file</label>
+          <input type="file" id="photoFile" accept="image/*" aria-describedby="photoFileName">
+          <span class="file-name" id="photoFileName" aria-live="polite">No file chosen</span>
+        </div>
+
+        <div id="cameraPhotoPanel" class="photo-panel hidden">
+          <div class="camera-box">
+            <video id="cameraVideo" autoplay playsinline></video>
+            <canvas id="cameraCanvas" class="hidden"></canvas>
+          </div>
+          <div class="camera-actions">
+            <button type="button" class="btn secondary" id="startCameraBtn">Start camera</button>
+            <button type="button" class="btn secondary" id="captureBtn" disabled>Capture photo</button>
+            <button type="button" class="btn ghost" id="retakeBtn" disabled>Retake</button>
+          </div>
+          <p class="camera-note" id="cameraNote" aria-live="polite">Camera access is off. Click "Start camera" to enable it.</p>
+        </div>
+
+        <img id="photoPreview" class="photo-preview hidden" alt="Borrower photo preview">
+        <span class="error" id="err-photo" role="alert" aria-live="polite"></span>
+      </fieldset>
+
+      <fieldset class="field full">
+        <legend>Security password</legend>
+        <p class="caption">Protects this record. Minimum 6 characters.</p>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-input">
+            <input type="password" id="password" minlength="6" autocomplete="new-password" aria-describedby="err-password" required>
+            <button type="button" class="password-toggle" data-target="password" aria-pressed="false">
+              <span class="visually-hidden">Show password</span>
+              <span aria-hidden="true">Show</span>
+            </button>
+          </div>
+          <span class="error" id="err-password" role="alert" aria-live="polite"></span>
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm password</label>
+          <div class="password-input">
+            <input type="password" id="confirmPassword" minlength="6" autocomplete="new-password" aria-describedby="err-confirmPassword" required>
+            <button type="button" class="password-toggle" data-target="confirmPassword" aria-pressed="false">
+              <span class="visually-hidden">Show password</span>
+              <span aria-hidden="true">Show</span>
+            </button>
+          </div>
+          <span class="error" id="err-confirmPassword" role="alert" aria-live="polite"></span>
+        </div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" class="submit-btn">Submit</button>
+      </div>
+    </form>
+
+    <section id="summaryCard" class="card summary hidden" aria-live="polite">
+      <h2>Record saved</h2>
+      <dl id="summaryList"></dl>
+      <div class="risk-badge-row">
+        <span>Risk level:</span>
+        <span id="summaryRiskBadge" class="risk-badge">—</span>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- No static #toast div needed: shared/js/toast.js creates and manages
+       its own #toast-region container automatically. -->
+
+  <script src="../../config.js" defer></script>
+  <script src="../../services/apiClient.js" defer></script>
+  <script src="../../services/lendingService.js" defer></script>
+  <script src="../../utils/validators.js" defer></script>
+  <script src="../../components/toast.js" defer></script>
+  <script src="enter-lender.js" defer></script>
+</body>
+</html>

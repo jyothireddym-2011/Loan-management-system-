@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Ledgerline</title>
+<link rel="stylesheet" href="../../assets/css/components.css">
+</head>
+<body>
+
+<div class="hero-bg"></div>
+<div class="hero-overlay"></div>
+
+<div class="content-wrap">
+  <div class="brandline">Ledgerline · Private Lending Desk</div>
+
+  <!-- ============ STATE 1: no lender signed in yet ============ -->
+  <div class="card" id="loginCard">
+    <h2 id="loginHeading" tabindex="-1">Welcome back</h2>
+    <p class="sub">Sign in to open your lending ledger.</p>
+
+    <form id="loginForm" novalidate>
+      <label for="email">Lender email address</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email" aria-describedby="err-email" required>
+      <span class="error" id="err-email" role="alert" aria-live="polite"></span>
+
+      <label for="password">Password</label>
+      <div class="password-input">
+        <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" aria-describedby="err-password" required>
+        <button type="button" class="password-toggle" data-target="password" aria-pressed="false">
+          <span class="visually-hidden">Show password</span>
+          <span aria-hidden="true">Show</span>
+        </button>
+      </div>
+      <span class="error" id="err-password" role="alert" aria-live="polite"></span>
+
+      <label for="contact">Contact number</label>
+      <input type="tel" id="contact" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" autocomplete="tel" aria-describedby="err-contact" required>
+      <span class="error" id="err-contact" role="alert" aria-live="polite"></span>
+
+      <!-- Summary error kept for a single overall announcement on submit;
+           per-field spans above give specific detail. Empty and untouched
+           by CSS display rules — JS toggles a "visible" class. -->
+      <div class="error-text" id="loginError" role="alert" aria-live="assertive"></div>
+
+      <button class="btn" type="submit">Login</button>
+    </form>
+  </div>
+
+  <!-- ============ STATE 2: lender details already collected ============ -->
+  <div class="card hidden" id="sessionCard">
+    <h2 id="sessionHeading" tabindex="-1">You're already signed in</h2>
+    <p class="sub">These lender details are already on file for this session.</p>
+
+    <div class="session-info">
+      <div class="info-row"><span>Email</span><span id="sessionEmail">—</span></div>
+      <div class="info-row"><span>Contact</span><span id="sessionContact">—</span></div>
+    </div>
+
+    <button class="btn" id="continueBtn">Continue to Ledger</button>
+    <button class="btn-ghost" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<!-- No static #toast div needed: shared/js/toast.js creates and manages
+     its own #toast-region container automatically. -->
+
+<script src="../../utils/validators.js" defer></script>
+<script src="../../components/toast.js" defer></script>
+<script src="login.js" defer></script>
+</body>
+</html>

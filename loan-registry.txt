@@ -1,0 +1,248 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Agreement Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/components.css">
+</head>
+<body>
+
+  <div class="registry">
+
+    <!-- Header / Eyebrow -->
+    <header class="masthead">
+      <p class="eyebrow">Ledger No. 04 &middot; Borrower Registry</p>
+      <h1 class="title">Loan Agreement Registry</h1>
+      <p class="subtitle">Enter, amend, and retire borrower records against the standing loan agreement.</p>
+    </header>
+
+    <!-- Ticker: the scrolling track is decorative only (aria-hidden), so a
+         screen reader never encounters the duplicated loop content. A single,
+         real download link is provided outside the ticker for assistive tech
+         and keyboard users. Motion is paused entirely under
+         prefers-reduced-motion. -->
+    <div class="ticker-band">
+      <div class="ticker-track" id="tickerTrack" aria-hidden="true">
+        <span class="ticker-item">📄 LOAN AGREEMENT FORM — READY FOR DOWNLOAD</span>
+        <span class="ticker-item">⬇ Download Loan_Agreement_Form-4.docx</span>
+        <span class="ticker-item">•</span>
+        <span class="ticker-item">📄 LOAN AGREEMENT FORM — READY FOR DOWNLOAD</span>
+        <span class="ticker-item">⬇ Download Loan_Agreement_Form-4.docx</span>
+        <span class="ticker-item">•</span>
+      </div>
+      <a class="ticker-download-link visually-hidden-focusable"
+         href="Loan_Agreement_Form-4.docx" download>
+        Download loan agreement form (Loan_Agreement_Form-4.docx)
+      </a>
+    </div>
+
+    <!-- Service selector: real ARIA tabs -->
+    <section class="service-select" aria-label="Select a service">
+      <p class="section-label" id="serviceTabsLabel">Select Service</p>
+      <div class="tabs" id="serviceTabs" role="tablist" aria-labelledby="serviceTabsLabel">
+        <button class="tab active" id="tab-add" role="tab" aria-selected="true" aria-controls="view-add" data-service="add">Enter Borrower</button>
+        <button class="tab" id="tab-edit" role="tab" aria-selected="false" aria-controls="view-edit" data-service="edit" tabindex="-1">Edit Borrower</button>
+        <button class="tab" id="tab-remove" role="tab" aria-selected="false" aria-controls="view-remove" data-service="remove" tabindex="-1">Remove Borrower</button>
+        <button class="tab" id="tab-query" role="tab" aria-selected="false" aria-controls="view-query" data-service="query" tabindex="-1">Query Records</button>
+      </div>
+    </section>
+
+    <!-- Main panel -->
+    <main class="panel">
+
+      <!-- ADD -->
+      <section class="service-view active" id="view-add" role="tabpanel" aria-labelledby="tab-add" tabindex="0">
+        <div class="panel-head">
+          <h2>Enter Borrower Details</h2>
+          <span class="seal">NEW</span>
+        </div>
+        <form id="addForm" class="ledger-form" novalidate>
+          <div class="field">
+            <label for="add-name">Full name</label>
+            <input type="text" id="add-name" required placeholder="e.g. Ramesh Kumar" aria-describedby="err-add-name">
+            <span class="error" id="err-add-name" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="add-phone">Phone number</label>
+            <input type="tel" id="add-phone" required placeholder="e.g. 9876543210" autocomplete="tel" aria-describedby="err-add-phone">
+            <span class="error" id="err-add-phone" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="add-email">Email</label>
+            <input type="email" id="add-email" placeholder="name@example.com" autocomplete="email" aria-describedby="err-add-email">
+            <span class="error" id="err-add-email" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="add-address">Address</label>
+            <input type="text" id="add-address" placeholder="Street, City, State" autocomplete="street-address">
+          </div>
+          <div class="field">
+            <label for="add-idnum">ID / Aadhaar number</label>
+            <input type="text" id="add-idnum" placeholder="e.g. 1234 5678 9012" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="add-amount">Loan amount (₹)</label>
+            <input type="text" id="add-amount" inputmode="numeric" required placeholder="e.g. 2,50,000" autocomplete="off" aria-describedby="err-add-amount">
+            <span class="error" id="err-add-amount" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="add-type">Loan type</label>
+            <select id="add-type">
+              <option>Personal</option>
+              <option>Home</option>
+              <option>Vehicle</option>
+              <option>Education</option>
+              <option>Business</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="add-date">Agreement date</label>
+            <input type="date" id="add-date">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Save borrower</button>
+            <button type="reset" class="btn ghost">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- EDIT -->
+      <section class="service-view" id="view-edit" role="tabpanel" aria-labelledby="tab-edit" tabindex="0" hidden>
+        <div class="panel-head">
+          <h2>Edit Borrower Details</h2>
+          <span class="seal seal-gold">EDIT</span>
+        </div>
+        <div class="lookup-row">
+          <label for="edit-lookup" class="visually-hidden">Search by name or Borrower ID</label>
+          <input type="text" id="edit-lookup" placeholder="Search by name or Borrower ID (e.g. BR-0001)">
+          <button class="btn secondary" id="edit-find">Find</button>
+        </div>
+        <div id="edit-status" class="empty-note" aria-live="polite">Search for a borrower above to load their record.</div>
+        <form id="editForm" class="ledger-form hidden" novalidate>
+          <input type="hidden" id="edit-id">
+          <div class="field">
+            <label for="edit-name">Full name</label>
+            <input type="text" id="edit-name" required aria-describedby="err-edit-name">
+            <span class="error" id="err-edit-name" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="edit-phone">Phone number</label>
+            <input type="tel" id="edit-phone" required autocomplete="tel" aria-describedby="err-edit-phone">
+            <span class="error" id="err-edit-phone" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="edit-email">Email</label>
+            <input type="email" id="edit-email" autocomplete="email" aria-describedby="err-edit-email">
+            <span class="error" id="err-edit-email" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="edit-address">Address</label>
+            <input type="text" id="edit-address" autocomplete="street-address">
+          </div>
+          <div class="field">
+            <label for="edit-idnum">ID / Aadhaar number</label>
+            <input type="text" id="edit-idnum" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="edit-amount">Loan amount (₹)</label>
+            <input type="text" id="edit-amount" inputmode="numeric" required autocomplete="off" aria-describedby="err-edit-amount">
+            <span class="error" id="err-edit-amount" role="alert" aria-live="polite"></span>
+          </div>
+          <div class="field">
+            <label for="edit-type">Loan type</label>
+            <select id="edit-type">
+              <option>Personal</option>
+              <option>Home</option>
+              <option>Vehicle</option>
+              <option>Education</option>
+              <option>Business</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="edit-date">Agreement date</label>
+            <input type="date" id="edit-date">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Update record</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- REMOVE -->
+      <section class="service-view" id="view-remove" role="tabpanel" aria-labelledby="tab-remove" tabindex="0" hidden>
+        <div class="panel-head">
+          <h2>Remove Borrower Details</h2>
+          <span class="seal seal-red">REMOVE</span>
+        </div>
+        <div class="lookup-row">
+          <label for="remove-lookup" class="visually-hidden">Search by name or Borrower ID</label>
+          <input type="text" id="remove-lookup" placeholder="Search by name or Borrower ID (e.g. BR-0001)">
+          <button class="btn secondary" id="remove-find">Find</button>
+        </div>
+        <div id="remove-status" class="empty-note" aria-live="polite">Search for a borrower above to review before removing.</div>
+        <div id="remove-card" class="record-card hidden"></div>
+        <!--
+          Reminder for loan-registry.js: the "Remove" button rendered inside
+          #remove-card must call `await LendingConfirm.ask(...)` and only
+          proceed with deletion if it resolves true. This is the one flow in
+          the app where skipping the confirm dialog would be a real problem,
+          not just a UX nicety.
+        -->
+      </section>
+
+      <!-- QUERY -->
+      <section class="service-view" id="view-query" role="tabpanel" aria-labelledby="tab-query" tabindex="0" hidden>
+        <div class="panel-head">
+          <h2>Query Records</h2>
+          <span class="seal seal-gold">QUERY</span>
+        </div>
+        <div class="lookup-row">
+          <label for="query-input" class="visually-hidden">Filter records</label>
+          <input type="text" id="query-input" placeholder="Filter by name, ID, loan type, or phone…">
+          <label for="query-sort" class="visually-hidden">Sort records</label>
+          <select id="query-sort">
+            <option value="recent">Sort: most recent</option>
+            <option value="name">Sort: name (A–Z)</option>
+            <option value="amount">Sort: loan amount (high–low)</option>
+          </select>
+        </div>
+        <p class="result-count" id="resultCount" aria-live="polite">0 records</p>
+        <div class="table-wrap">
+          <table class="ledger-table" id="ledgerTable">
+            <caption class="visually-hidden">Loan borrower records</caption>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Loan type</th>
+                <th scope="col">Amount (₹)</th>
+                <th scope="col">Date</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="foot-note">
+      <p>Records are stored locally in this browser. No data leaves your device.</p>
+    </footer>
+
+  </div>
+
+  <!-- No static #toast div needed: shared/js/toast.js creates and manages
+       its own #toast-region container automatically. -->
+
+  <script src="../../utils/validators.js" defer></script>
+  <script src="../../components/toast.js" defer></script>
+  <script src="../../components/confirmDialog.js" defer></script>
+  <script src="loan-registry.js" defer></script>
+</body>
+</html>

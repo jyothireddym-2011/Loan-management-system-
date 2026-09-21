@@ -1,0 +1,43 @@
+.hidden { display: none; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.password-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.password-input input { flex: 1; }
+.password-toggle {
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.error-text {
+  display: none;
+  color: #b91c1c;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+.error-text.visible { display: block; }
+
+/* Heading gets a focus outline only when programmatically focused via JS,
+   so sighted keyboard users still see where focus landed on state change */
+h2[tabindex="-1"]:focus {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}

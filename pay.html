@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update / Pay — Lending Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/components.css">
+</head>
+<body>
+
+  <div class="wrap">
+
+    <header class="head">
+      <p class="eyebrow">Lending Desk</p>
+      <h1>Update / Pay</h1>
+      <p class="sub">Look up a borrower, enter the amount being paid back, and the balance is calculated automatically.</p>
+    </header>
+
+    <form id="payForm" class="card" novalidate>
+
+      <div class="field">
+        <label for="bname">Borrower name</label>
+        <input type="text" id="bname" placeholder="e.g. Ramesh Kumar" aria-describedby="err-bname" required>
+        <span class="error" id="err-bname" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="aadhar">Aadhar number</label>
+        <input type="text" id="aadhar" inputmode="numeric" maxlength="14" placeholder="XXXX XXXX XXXX" autocomplete="off" aria-describedby="err-aadhar" required>
+        <span class="error" id="err-aadhar" role="alert" aria-live="polite"></span>
+      </div>
+
+      <!-- aria-live: balance updates as the user types, so screen reader
+           users need to hear the new figures without any extra action -->
+      <div id="balancePanel" class="balance-panel hidden" aria-live="polite" aria-atomic="true">
+        <div class="balance-row"><span>Old (existing) amount</span><strong id="oldAmount">—</strong></div>
+        <div class="balance-row"><span>Paying amount</span><strong id="payingPreview">—</strong></div>
+        <div class="balance-row total"><span>New balance (auto-calculated)</span><strong id="newAmount">—</strong></div>
+        <div class="risk-badge-row">
+          <span>Risk level:</span>
+          <span id="payRiskBadge" class="risk-badge">—</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="payingAmount">Paying amount</label>
+        <!-- text + inputmode instead of type="number": avoids the scroll-wheel
+             bug, which matters especially here since this field drives a
+             live balance calculation the user is watching in real time -->
+        <input type="text" id="payingAmount" inputmode="numeric" placeholder="e.g. 10,000" autocomplete="off" aria-describedby="err-payingAmount" required>
+        <span class="caption">New balance = old amount - paying amount</span>
+        <span class="error" id="err-payingAmount" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field full dual-amount-field">
+        <button type="button" class="btn secondary dual-amount-btn" id="dualAmountBtn">Dual Amount (Old - Paying)</button>
+        <span class="caption" id="dualAmountResult" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="agreementFile">Loan agreement file</label>
+        <input type="file" id="agreementFile" accept=".pdf,.doc,.docx" aria-describedby="agreementFileName err-agreementFile" required>
+        <span class="file-name" id="agreementFileName" aria-live="polite">No file chosen</span>
+        <span class="caption">Required to edit this record — the record cannot be updated without it.</span>
+        <span class="error" id="err-agreementFile" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="field">
+        <label for="password">Security password</label>
+        <div class="password-input">
+          <input type="password" id="password" minlength="6" placeholder="Minimum 6 characters" autocomplete="current-password" aria-describedby="err-password" required>
+          <button type="button" class="password-toggle" data-target="password" aria-pressed="false">
+            <span class="visually-hidden">Show password</span>
+            <span aria-hidden="true">Show</span>
+          </button>
+        </div>
+        <span class="error" id="err-password" role="alert" aria-live="polite"></span>
+      </div>
+      <div class="field">
+        <label for="confirmPassword">Confirm password</label>
+        <div class="password-input">
+          <input type="password" id="confirmPassword" minlength="6" placeholder="Re-enter password" autocomplete="current-password" aria-describedby="err-confirmPassword" required>
+          <button type="button" class="password-toggle" data-target="confirmPassword" aria-pressed="false">
+            <span class="visually-hidden">Show password</span>
+            <span aria-hidden="true">Show</span>
+          </button>
+        </div>
+        <span class="error" id="err-confirmPassword" role="alert" aria-live="polite"></span>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="submit-btn">Submit</button>
+      </div>
+    </form>
+
+    <section id="resultCard" class="card summary hidden" aria-live="polite">
+      <h2 id="resultHeading" tabindex="-1">Payment recorded</h2>
+      <dl id="resultList"></dl>
+    </section>
+
+    <a class="back-link" href="../loan-registry/index.html">&larr; Back to services</a>
+  </div>
+
+  <!-- No static #toast div needed: shared/js/toast.js creates and manages
+       its own #toast-region container automatically. -->
+
+  <script src="../../config.js" defer></script>
+  <script src="../../services/apiClient.js" defer></script>
+  <script src="../../services/lendingService.js" defer></script>
+  <script src="../../utils/validators.js" defer></script>
+  <script src="../../components/toast.js" defer></script>
+  <script src="../../components/confirmDialog.js" defer></script>
+  <script src="pay.js" defer></script>
+</body>
+</html>

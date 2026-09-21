@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loan Agreement Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/components.css">
+</head>
+<body>
+
+  <div class="registry">
+
+    <!-- Header / Eyebrow -->
+    <header class="masthead">
+      <p class="eyebrow">Ledger No. 04 &middot; Borrower Registry</p>
+      <h1 class="title">Loan Agreement Registry</h1>
+      <p class="subtitle">Enter, amend, and retire borrower records against the standing loan agreement.</p>
+    </header>
+
+    <!-- Ticker / marquee with the document download link -->
+    <div class="ticker-band" role="region" aria-label="Document download ticker">
+      <div class="ticker-track" id="tickerTrack">
+        <span class="ticker-item">📄 LOAN AGREEMENT FORM — READY FOR DOWNLOAD</span>
+        <a class="ticker-item ticker-link" href="Loan_Agreement_Form-4.docx" download>⬇ Download Loan_Agreement_Form-4.docx</a>
+        <span class="ticker-item">•</span>
+        <span class="ticker-item">📄 LOAN AGREEMENT FORM — READY FOR DOWNLOAD</span>
+        <a class="ticker-item ticker-link" href="Loan_Agreement_Form-4.docx" download>⬇ Download Loan_Agreement_Form-4.docx</a>
+        <span class="ticker-item">•</span>
+      </div>
+    </div>
+
+    <!-- Service selector -->
+    <section class="service-select" aria-label="Select a service">
+      <p class="section-label">Select Service</p>
+      <div class="tabs" id="serviceTabs">
+        <button class="tab active" data-service="add">Enter Borrower</button>
+        <button class="tab" data-service="edit">Edit Borrower</button>
+        <button class="tab" data-service="remove">Remove Borrower</button>
+        <button class="tab" data-service="query">Query Records</button>
+      </div>
+    </section>
+
+    <!-- Main panel -->
+    <main class="panel">
+
+      <!-- ADD -->
+      <section class="service-view active" id="view-add">
+        <div class="panel-head">
+          <h2>Enter Borrower Details</h2>
+          <span class="seal">NEW</span>
+        </div>
+        <form id="addForm" class="ledger-form" novalidate>
+          <div class="field">
+            <label for="add-name">Full name</label>
+            <input type="text" id="add-name" required placeholder="e.g. Ramesh Kumar">
+            <span class="error" id="err-add-name"></span>
+          </div>
+          <div class="field">
+            <label for="add-phone">Phone number</label>
+            <input type="tel" id="add-phone" required placeholder="e.g. 9876543210">
+            <span class="error" id="err-add-phone"></span>
+          </div>
+          <div class="field">
+            <label for="add-email">Email</label>
+            <input type="email" id="add-email" placeholder="name@example.com">
+            <span class="error" id="err-add-email"></span>
+          </div>
+          <div class="field">
+            <label for="add-address">Address</label>
+            <input type="text" id="add-address" placeholder="Street, City, State">
+          </div>
+          <div class="field">
+            <label for="add-idnum">ID / Aadhaar number</label>
+            <input type="text" id="add-idnum" placeholder="e.g. 1234 5678 9012">
+          </div>
+          <div class="field">
+            <label for="add-amount">Loan amount (₹)</label>
+            <input type="number" id="add-amount" min="0" step="100" required placeholder="e.g. 250000">
+            <span class="error" id="err-add-amount"></span>
+          </div>
+          <div class="field">
+            <label for="add-type">Loan type</label>
+            <select id="add-type">
+              <option>Personal</option>
+              <option>Home</option>
+              <option>Vehicle</option>
+              <option>Education</option>
+              <option>Business</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="add-date">Agreement date</label>
+            <input type="date" id="add-date">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Save borrower</button>
+            <button type="reset" class="btn ghost">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- EDIT -->
+      <section class="service-view" id="view-edit">
+        <div class="panel-head">
+          <h2>Edit Borrower Details</h2>
+          <span class="seal seal-gold">EDIT</span>
+        </div>
+        <div class="lookup-row">
+          <input type="text" id="edit-lookup" placeholder="Search by name or Borrower ID (e.g. BR-0001)">
+          <button class="btn secondary" id="edit-find">Find</button>
+        </div>
+        <div id="edit-empty" class="empty-note">Search for a borrower above to load their record.</div>
+        <form id="editForm" class="ledger-form hidden" novalidate>
+          <input type="hidden" id="edit-id">
+          <div class="field">
+            <label for="edit-name">Full name</label>
+            <input type="text" id="edit-name" required>
+            <span class="error" id="err-edit-name"></span>
+          </div>
+          <div class="field">
+            <label for="edit-phone">Phone number</label>
+            <input type="tel" id="edit-phone" required>
+            <span class="error" id="err-edit-phone"></span>
+          </div>
+          <div class="field">
+            <label for="edit-email">Email</label>
+            <input type="email" id="edit-email">
+            <span class="error" id="err-edit-email"></span>
+          </div>
+          <div class="field">
+            <label for="edit-address">Address</label>
+            <input type="text" id="edit-address">
+          </div>
+          <div class="field">
+            <label for="edit-idnum">ID / Aadhaar number</label>
+            <input type="text" id="edit-idnum">
+          </div>
+          <div class="field">
+            <label for="edit-amount">Loan amount (₹)</label>
+            <input type="number" id="edit-amount" min="0" step="100" required>
+            <span class="error" id="err-edit-amount"></span>
+          </div>
+          <div class="field">
+            <label for="edit-type">Loan type</label>
+            <select id="edit-type">
+              <option>Personal</option>
+              <option>Home</option>
+              <option>Vehicle</option>
+              <option>Education</option>
+              <option>Business</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="edit-date">Agreement date</label>
+            <input type="date" id="edit-date">
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn primary">Update record</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- REMOVE -->
+      <section class="service-view" id="view-remove">
+        <div class="panel-head">
+          <h2>Remove Borrower Details</h2>
+          <span class="seal seal-red">REMOVE</span>
+        </div>
+        <div class="lookup-row">
+          <input type="text" id="remove-lookup" placeholder="Search by name or Borrower ID (e.g. BR-0001)">
+          <button class="btn secondary" id="remove-find">Find</button>
+        </div>
+        <div id="remove-empty" class="empty-note">Search for a borrower above to review before removing.</div>
+        <div id="remove-card" class="record-card hidden"></div>
+      </section>
+
+      <!-- QUERY -->
+      <section class="service-view" id="view-query">
+        <div class="panel-head">
+          <h2>Query Records</h2>
+          <span class="seal seal-gold">QUERY</span>
+        </div>
+        <div class="lookup-row">
+          <input type="text" id="query-input" placeholder="Filter by name, ID, loan type, or phone…">
+          <select id="query-sort">
+            <option value="recent">Sort: most recent</option>
+            <option value="name">Sort: name (A–Z)</option>
+            <option value="amount">Sort: loan amount (high–low)</option>
+          </select>
+        </div>
+        <p class="result-count" id="resultCount">0 records</p>
+        <div class="table-wrap">
+          <table class="ledger-table" id="ledgerTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Loan type</th>
+                <th>Amount (₹)</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="foot-note">
+      <p>Records are stored locally in this browser. No data leaves your device.</p>
+    </footer>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../../utils/validators.js"></script>
+  <script src="../../components/toast.js"></script>
+  <script src="../../components/confirmDialog.js"></script>
+  <script src="loan-registry.js"></script>
+</body>
+</html>

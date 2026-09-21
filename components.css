@@ -1,0 +1,42 @@
+/* shared/css/components.css
+   Styles for the shared toast + confirm dialog components.
+   Include once alongside each app's own stylesheet.
+
+   Dependencies:
+   - Expects a `.btn` base class to be defined by the host app's stylesheet
+     (used by `.confirm-actions .btn.danger` below).
+   - Class names `.invalid` on input/select/textarea are toggled by
+     validators.js-driven forms (e.g. loan-registry-app-1) to flag an
+     invalid field without waiting for the error text alone.
+*/
+
+:root {
+  /* Color tokens */
+  --color-ink: #1f2430;
+  --color-surface: #fff;
+  --color-success: #1f7a4d;
+  --color-danger: #a3312a;
+  --color-overlay: rgba(15, 17, 21, 0.5);
+
+  /* Spacing tokens */
+  --space-toast-offset: 28px;
+  --space-toast-padding-y: 12px;
+  --space-toast-padding-x: 20px;
+  --space-dialog-padding: 24px;
+  --space-dialog-gap: 10px;
+
+  /* Motion tokens */
+  --motion-fast: 0.2s ease;
+
+  /* Elevation */
+  --z-toast: 1000;
+  --z-overlay: 1100;
+  --shadow-dialog: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- Toast ---------- */
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: var(--space-toast-offset);
