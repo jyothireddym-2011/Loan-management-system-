@@ -1,17 +1,7 @@
-Flask>=3.0,<4.0
-Werkzeug>=3.0,<4.0
-PyJWT>=2.8,<3.0
-cryptography>=42.0
-python-dotenv>=1.0
-
-# Optional — enables real content-based MIME sniffing for document
-# uploads (falls back to extension-only checking + a warning log if not
-# installed; requires the libmagic system library too).
-# python-magic>=0.4.27
-
-# Production WSGI server (see README "Running in production").
-gunicorn>=22.0
-
-# Postgres driver — required now that docker-compose.yml's DATABASE_URL
-# is postgresql://
-psycopg2-binary>=2.9
+# The ML package has ZERO third-party dependencies by design (pure Python
+# Gaussian Naive Bayes implementation). This file is kept so the module can
+# grow independently of the backend's requirements.txt.
+#
+# Uncomment if/when the model is upgraded to a scikit-learn implementation:
+# scikit-learn>=1.4,<2.0
+# numpy>=1.26,<2.0
